@@ -11,7 +11,7 @@ char    *hostnameResolution(const char *hostname)
 
 	ft_memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_INET;
-	hints.ai_socktype = SOCK_STREAM; // TCP
+	hints.ai_socktype = SOCK_STREAM;
 	status = getaddrinfo(hostname, 0, &hints, &res);
 	if (status != 0)
 	{
