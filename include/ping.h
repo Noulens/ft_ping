@@ -25,13 +25,21 @@
 
 extern int  g_ping_data;
 
+typedef enum e_options
+{
+	C = 0b00001
+}   t_opt;
+
 typedef struct s_data
 {
 	struct sockaddr_in  source;
 	int                 opt;
-}	t_data;
+	size_t              count;
+	char                buffer[INET_ADDRSTRLEN];
+}   t_data;
 
 void    error(const char *msg, int error_code, int must_exit);
 int     is_valid_ip(char *ip, t_data *data);
+void    check_args(int ac, char **av, t_data *target);
 
 # endif /* !PING_H */

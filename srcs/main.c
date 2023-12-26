@@ -30,10 +30,11 @@ int main(int ac, char **av)
 {
 	t_data  target = {0};
 
-	if (ac == 1)
-		error("usage error: Destination address required", -1, TRUE);
 	signal_handling();
-	if (is_valid_ip(av[1], &target) != 1)
-		error("Name or service not known", -1, TRUE);
+	check_args(ac, av, &target);
+	while (target.count--)
+	{
+		sleep(1);
+	}
 	return (0);
 }
