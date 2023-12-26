@@ -64,7 +64,7 @@ int is_valid_ip(char *ip, t_data *data)
 	else
 	{
 		if (inet_pton(AF_INET, source, &data->source.sin_addr) != 1)
-			return (0);
+			return (free(source), 0);
 	}
 	free(source);
 	data->source.sin_family = AF_INET;
