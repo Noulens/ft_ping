@@ -24,7 +24,8 @@ char    *hostnameResolution(const char *hostname)
 		if (r->ai_family == AF_INET)
 		{
 			struct sockaddr_in *ipv4 = (struct sockaddr_in *)r->ai_addr;
-			inet_ntop(r->ai_family, &(ipv4->sin_addr), buffer, sizeof buffer);
+			if (!inet_ntop(r->ai_family, &(ipv4->sin_addr), buffer, sizeof buffer))
+				error("inet_ntop", errno, FALSE);
 		}
 		r = r->ai_next;
 	}
