@@ -1,4 +1,4 @@
-NAME		=	ft_malcolm
+NAME		=	ft_ping
 
 VPATH		=	srcs
 
@@ -12,10 +12,7 @@ SRCS_DIR	=	$(sort $(dir $(wildcard ./srcs/*/)))
 
 SRCS		=	$(addprefix srcs/,						\
 										main.c			\
-					$(addprefix files/,	spoof.c			\
-										tools.c			\
-										check.c			\
-										error.c			\
+					$(addprefix files/,	error.c			\
 										network.c		\
 										)				\
 					)
@@ -114,12 +111,3 @@ re:				fclean
 
 rebonus:		fclean
 				@$(MAKE) -s bonus
-
-test:
-				docker-compose -f ./Docker/docker-compose.yml up --build -d
-				docker exec -it attacker fish
-
-cleantest:
-				docker-compose -f ./Docker/docker-compose.yml down
-				docker system prune -af
-
