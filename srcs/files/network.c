@@ -67,7 +67,9 @@ int is_valid_ip(char *ip, t_data *data)
 		if (inet_pton(AF_INET, source, &data->source.sin_addr) != 1)
 			return (free(source), 0);
 	}
+	ft_printf("PING %s (%s) TBD(TBD) bytes of data.\n", ip, source);
 	free(source);
+	ft_memcpy(data->buffer, ip, ft_strlen(ip));
 	data->source.sin_family = AF_INET;
 	return (1);
 }

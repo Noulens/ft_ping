@@ -25,6 +25,8 @@
 
 extern int  g_ping_data;
 
+# define BUFFER 1024
+
 typedef enum e_options
 {
 	C = 0b00001
@@ -34,8 +36,8 @@ typedef struct s_data
 {
 	struct sockaddr_in  source;
 	int                 opt;
-	size_t              count;
-	char                buffer[INET_ADDRSTRLEN];
+	int                 count;
+	char                buffer[BUFFER];
 }   t_data;
 
 void    error(const char *msg, int error_code, int must_exit);

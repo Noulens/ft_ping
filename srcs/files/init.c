@@ -8,6 +8,7 @@ void    check_args(int ac, char **av, t_data *target)
 {
 	size_t  len = 0;
 
+	target->count = -1;
 	++av;
 	if (ac == 1)
 	{
@@ -42,8 +43,10 @@ void    check_args(int ac, char **av, t_data *target)
 				++*av;
 			}
 		}
-		else if (is_valid_ip(*av, target) != 1)
-			error("Name or service not known", -1, TRUE);
+		else
+			ft_memcpy(target->buffer, *av, ft_strlen(*av));
 		++av;
 	}
+	if (is_valid_ip(target->buffer, target) != 1)
+		error("Name or service not known", -1, TRUE);
 }
