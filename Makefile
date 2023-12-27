@@ -15,6 +15,7 @@ SRCS		=	$(addprefix srcs/,						\
 					$(addprefix files/,	error.c			\
 										network.c		\
 										init.c			\
+										tools.c			\
 										)				\
 					)
 

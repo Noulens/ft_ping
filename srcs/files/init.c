@@ -47,6 +47,4 @@ void    check_args(int ac, char **av, t_data *target)
 			ft_memcpy(target->buffer, *av, ft_strlen(*av));
 		++av;
 	}
-	if (is_valid_ip(target->buffer, target) != 1)
-		error("Name or service not known", -1, TRUE);
 }

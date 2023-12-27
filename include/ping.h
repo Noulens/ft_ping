@@ -22,6 +22,24 @@
 # include <net/ethernet.h>
 # include <netinet/if_ether.h>
 # include <sys/ioctl.h>
+# include <time.h>
+# include <linux/icmp.h>
+
+// RFC 792 for a description of the ICMP protocol.
+
+// Define the Packet Constants
+// ping packet size
+#define PING_PKT_S 64
+
+// Automatic port number
+#define PORT_NO 0
+
+// Sleep rate
+#define PING_SLEEP_RATE 1000000 x
+
+// Gives the timeout delay for receiving packets
+// in seconds
+#define RECV_TIMEOUT 1
 
 extern int  g_ping_data;
 
@@ -32,6 +50,12 @@ typedef enum e_options
 	C = 0b00001
 }   t_opt;
 
+struct s_ping_packet
+{
+	struct icmphdr  hdr;
+	char            msg[PING_PKT_S - sizeof(struct icmphdr)];
+}   t_ppckt;
+
 typedef struct s_data
 {
 	struct sockaddr_in  source;
@@ -40,8 +64,9 @@ typedef struct s_data
 	char                buffer[BUFFER];
 }   t_data;
 
-void    error(const char *msg, int error_code, int must_exit);
-int     is_valid_ip(char *ip, t_data *data);
-void    check_args(int ac, char **av, t_data *target);
+void            error(const char *msg, int error_code, int must_exit);
+int             is_valid_ip(char *ip, t_data *data);
+void            check_args(int ac, char **av, t_data *target);
+unsigned short  calculate_checksum(unsigned short *buf, int len)
 
 # endif /* !PING_H */
