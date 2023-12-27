@@ -28,15 +28,15 @@ void	signal_handling()
 int main(int ac, char **av)
 {
 	int                 nb_packets = 0;
-	struct sockaddr_in  source;
+	struct sockaddr_in  target;
 	int                 count;
 	char                buffer[ADDR_LEN];
 
 	signal_handling();
-	ft_bzero(&source, sizeof(source));
+	ft_bzero(&target, sizeof(target));
 	ft_bzero(buffer, ADDR_LEN);
 	check_args(ac, av, &count, buffer);
-	if (is_valid_ip(buffer, &source) != 1)
+	if (is_valid_ip(buffer, &target) != 1)
 		error("Name or service not known", -1, TRUE);
 	// Socket stuff
 	while (count == -1 ? g_ping_data : count--)
