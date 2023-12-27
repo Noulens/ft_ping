@@ -25,17 +25,19 @@ void	signal_handling()
 	sigaction(SIGINT, &sa, NULL);
 }
 
-
 int main(int ac, char **av)
 {
 	struct sockaddr_in  target;
+	struct sockaddr_in  r_addr;
+	socklen_t           r_addr_len;
 	t_ppckt             icmp_hdr;
-	char                packet[PING_PKT_S];
+	char                packet[128];
 	int                 nb_packets = 0;
 	int                 count;
 	int                 i;
 	int                 ttl_val = 64;
 	char                buffer[ADDR_LEN];
+	char                from[NI_MAXHOST];
 	struct timeval      timeout;
 
 	signal_handling();
@@ -56,30 +58,34 @@ int main(int ac, char **av)
 	if (setsockopt(socket_fd, SOL_IP, IP_TTL, &ttl_val, sizeof(ttl_val)) != 0)
 		error("setsockopt() failed", errno, TRUE);
 
-	ft_memset(&icmp_hdr, 0, sizeof(icmp_hdr));
-	icmp_hdr.hdr.type = ICMP_ECHO;
-	icmp_hdr.hdr.un.echo.id = htons(getpid());
-	icmp_hdr.hdr.code = 0;
-	for (i = 0; i < (int)sizeof(icmp_hdr.msg) - 1; i++)
-		icmp_hdr.msg[i] = i + '0';
-	icmp_hdr.msg[i] = '\0';
-	icmp_hdr.hdr.checksum  = htons(calculate_checksum((unsigned short *)&icmp_hdr, sizeof(icmp_hdr)));
-
 	while (count == -1 ? g_ping_data : count--)
 	{
+		ft_memset(&icmp_hdr, 0, sizeof(icmp_hdr));
+		icmp_hdr.hdr.type = ICMP_ECHO;
+		icmp_hdr.hdr.un.echo.id = htons(getpid());
+		icmp_hdr.hdr.code = 0;
+		for (i = 0; i < (int)sizeof(icmp_hdr.msg) - 1; i++)
+			icmp_hdr.msg[i] = 'A';
+		icmp_hdr.msg[i] = '\0';
+		icmp_hdr.hdr.un.echo.sequence = htons(nb_packets + 1);
+		icmp_hdr.hdr.checksum  = calculate_checksum((unsigned short *)&icmp_hdr, sizeof(icmp_hdr));
+
 		if (sendto(socket_fd, &icmp_hdr, sizeof(icmp_hdr), 0, (struct sockaddr *)&target, sizeof(target)) <= 0)
 		{
 			perror("sendto");
 			close(socket_fd);
 			return (1);
 		}
-		if (recv(socket_fd, packet, sizeof(packet), 0) <= 0) {
+		r_addr_len = sizeof(r_addr);
+		if (recvfrom(socket_fd, packet, sizeof(packet), 0, (struct sockaddr *)&r_addr, &r_addr_len) <= 0)
+		{
 			perror("recv");
 			close(socket_fd);
 			return (1);
 		}
 		nb_packets++;
-		printf("SIZE bytes from BUFFER: icmp_seq=TBD ttl=TBD time=TBD ms\n");
+		getnameinfo((struct sockaddr *)&r_addr, r_addr_len, from, NI_MAXHOST, NULL, 0, 0);
+		printf("TBD bytes from %s: icmp_seq=TBD ttl=TBD time=TBD ms\n", from);
 		sleep(PING_SLEEP_RATE);
 	}
 	ft_printf("--- %s ping statistics ---\n", buffer);
