@@ -4,11 +4,11 @@
 
 #include "ping.h"
 
-void    check_args(int ac, char **av, t_data *target)
+void    check_args(int ac, char **av, int *count, char *buffer)
 {
 	size_t  len = 0;
 
-	target->count = -1;
+	*count = -1;
 	++av;
 	if (ac == 1)
 	{
@@ -32,8 +32,8 @@ void    check_args(int ac, char **av, t_data *target)
 							++av;
 							--len;
 						}
-						target->count = ft_atoi(*av);
-						if (target->count < 1)
+						*count = ft_atoi(*av);
+						if (*count < 1)
 							error("bad number of packets to transmit.", -1, TRUE);
 						break;
 					default:
@@ -44,7 +44,10 @@ void    check_args(int ac, char **av, t_data *target)
 			}
 		}
 		else
-			ft_memcpy(target->buffer, *av, ft_strlen(*av));
+		{
+			size_t addr_len = ft_strlen(*av);
+			ft_memcpy(buffer, *av, addr_len > ADDR_LEN ? ADDR_LEN : addr_len);
+		}
 		++av;
 	}
 }

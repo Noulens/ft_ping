@@ -27,21 +27,28 @@ void	signal_handling()
 
 int main(int ac, char **av)
 {
-	t_data  target;
-	int     nb_packets = 0;
+	int                 nb_packets = 0;
+	struct sockaddr_in  source;
+	int                 count;
+	char                buffer[ADDR_LEN];
 
-	ft_bzero(&target, sizeof(target));
 	signal_handling();
-	check_args(ac, av, &target);
-	if (is_valid_ip(target.buffer, &target) != 1)
+	ft_bzero(&source, sizeof(source));
+	ft_bzero(buffer, ADDR_LEN);
+	check_args(ac, av, &count, buffer);
+	if (is_valid_ip(buffer, &source) != 1)
 		error("Name or service not known", -1, TRUE);
-	while (target.count == -1 ? g_ping_data : target.count--)
+	// Socket stuff
+	while (count == -1 ? g_ping_data : count--)
 	{
-		printf("SIZE bytes from BUFFER: icmp_seq=TBD ttl=TBD time=TBD ms\n");
+		// Get packet ready
+		// Send packet
+		// Receive packet
 		nb_packets++;
+		printf("SIZE bytes from BUFFER: icmp_seq=TBD ttl=TBD time=TBD ms\n");
 		sleep(1);
 	}
-	ft_printf("--- %s ping statistics ---\n", target.buffer);
+	ft_printf("--- %s ping statistics ---\n", buffer);
 	ft_printf("%d packets transmitted, %d received, %d%% packet loss\n", nb_packets, nb_packets, 0);
 	return (0);
 }

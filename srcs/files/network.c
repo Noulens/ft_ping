@@ -34,7 +34,7 @@ char    *hostnameResolution(const char *hostname)
 	return (ret);
 }
 
-int is_valid_ip(char *ip, t_data *data)
+int is_valid_ip(char *ip, struct sockaddr_in *data)
 {
 	char    *source = ip;
 
@@ -55,8 +55,8 @@ int is_valid_ip(char *ip, t_data *data)
 		char    *test = ft_itoa(ft_atoi(source));
 		if (!ft_strcmp(test, source))
 		{
-			data->source.sin_family = AF_INET;
-			data->source.sin_addr.s_addr = htonl((uint32_t)ft_atoi(source));
+			data->sin_family = AF_INET;
+			data->sin_addr.s_addr = htonl((uint32_t)ft_atoi(source));
 			free(test);
 		}
 		else
@@ -64,12 +64,11 @@ int is_valid_ip(char *ip, t_data *data)
 	}
 	else
 	{
-		if (inet_pton(AF_INET, source, &data->source.sin_addr) != 1)
+		if (inet_pton(AF_INET, source, &data->sin_addr) != 1)
 			return (free(source), 0);
 	}
 	ft_printf("PING %s (%s) TBD(TBD) bytes of data.\n", ip, source);
 	free(source);
-	ft_memcpy(data->buffer, ip, ft_strlen(ip));
-	data->source.sin_family = AF_INET;
+	data->sin_family = AF_INET;
 	return (1);
 }

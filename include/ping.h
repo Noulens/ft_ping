@@ -31,7 +31,7 @@
 # define PORT_NO 0
 # define PING_SLEEP_RATE 1
 # define RECV_TIMEOUT 2
-# define BUFFER 1024
+# define ADDR_LEN 1024
 
 extern int  g_ping_data;
 
@@ -46,17 +46,9 @@ typedef struct s_ping_packet
 	char            msg[PING_PKT_S - sizeof(struct icmphdr)];
 }   t_ppckt;
 
-typedef struct s_data
-{
-	struct sockaddr_in  source;
-	int                 opt;
-	int                 count;
-	char                buffer[BUFFER];
-}   t_data;
-
 void            error(const char *msg, int error_code, int must_exit);
-int             is_valid_ip(char *ip, t_data *data);
-void            check_args(int ac, char **av, t_data *target);
+int             is_valid_ip(char *ip, struct sockaddr_in *data);
+void            check_args(int ac, char **av, int *count, char *buffer);
 unsigned short  calculate_checksum(unsigned short *buf, int len);
 
 # endif /* !PING_H */
