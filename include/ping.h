@@ -26,31 +26,21 @@
 # include <linux/icmp.h>
 
 // RFC 792 for a description of the ICMP protocol.
-
-// Define the Packet Constants
-// ping packet size
-#define PING_PKT_S 64
-
-// Automatic port number
-#define PORT_NO 0
-
-// Sleep rate
-#define PING_SLEEP_RATE 1000000 x
-
-// Gives the timeout delay for receiving packets
-// in seconds
-#define RECV_TIMEOUT 1
+// https://tools.ietf.org/html/rfc792
+# define PING_PKT_S 64
+# define PORT_NO 0
+# define PING_SLEEP_RATE 1
+# define RECV_TIMEOUT 2
+# define BUFFER 1024
 
 extern int  g_ping_data;
-
-# define BUFFER 1024
 
 typedef enum e_options
 {
 	C = 0b00001
 }   t_opt;
 
-struct s_ping_packet
+typedef struct s_ping_packet
 {
 	struct icmphdr  hdr;
 	char            msg[PING_PKT_S - sizeof(struct icmphdr)];
@@ -67,6 +57,6 @@ typedef struct s_data
 void            error(const char *msg, int error_code, int must_exit);
 int             is_valid_ip(char *ip, t_data *data);
 void            check_args(int ac, char **av, t_data *target);
-unsigned short  calculate_checksum(unsigned short *buf, int len)
+unsigned short  calculate_checksum(unsigned short *buf, int len);
 
 # endif /* !PING_H */
