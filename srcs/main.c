@@ -104,6 +104,6 @@ int main(int ac, char **av)
 	printf("%d packets transmitted, %d received, %0.1f%% packet loss, time %ldms\n", nb_packets, nb_r_packets, (((float)nb_packets - (float)nb_r_packets) * 100.0) / (float)nb_packets, end);
 	printf("rtt min/avg/max = %ld/%ld/%ld ms\n", min, avg / nb_packets, max);
 	if (close(socket_fd) == -1)
-		return (ft_fprintf(2, "close() failed: %s", strerror(errno)), EXIT_FAILURE);
+		return (fprintf(stderr, "close() failed: %s", strerror(errno)), EXIT_FAILURE);
 	return (0);
 }

@@ -25,7 +25,7 @@ char    *hostnameResolution(const char *hostname)
 		{
 			struct sockaddr_in *ipv4 = (struct sockaddr_in *)r->ai_addr;
 			if (!inet_ntop(r->ai_family, &(ipv4->sin_addr), buffer, sizeof buffer))
-				return (fprintf(stderr, "sendto() failed: %s", strerror(errno)), NULL);
+				return (fprintf(stderr, "inet_ntop() failed: %s", strerror(errno)), NULL);
 		}
 		r = r->ai_next;
 	}
