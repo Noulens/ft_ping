@@ -68,7 +68,7 @@ int main(int ac, char **av)
 			icmp_hdr.msg[i] = 'A';
 		icmp_hdr.msg[i] = '\0';
 		icmp_hdr.hdr.un.echo.sequence = htons(nb_packets + 1);
-		icmp_hdr.hdr.checksum  = calculate_checksum((unsigned short *)&icmp_hdr, sizeof(icmp_hdr));
+		icmp_hdr.hdr.checksum  = calculate_checksum((uint16_t *)&icmp_hdr, sizeof(icmp_hdr));
 
 		if (sendto(socket_fd, &icmp_hdr, sizeof(icmp_hdr), 0, (struct sockaddr *)&target, sizeof(target)) <= 0)
 		{
@@ -83,9 +83,18 @@ int main(int ac, char **av)
 			close(socket_fd);
 			return (1);
 		}
+		struct icmphdr *r_icmp_hdr = (struct icmphdr *)packet;
+		char *r_buffer = (char *)(buffer + sizeof(struct icmphdr));
 		nb_packets++;
 		getnameinfo((struct sockaddr *)&r_addr, r_addr_len, from, NI_MAXHOST, NULL, 0, 0);
 		printf("TBD bytes from %s: icmp_seq=TBD ttl=TBD time=TBD ms\n", from);
+		printf(" info from ECHO REPLY:\n");
+		printf(" type: %d\n", r_icmp_hdr->type);
+		printf(" code: %d\n", r_icmp_hdr->code);
+		printf(" checksum: %d\n", r_icmp_hdr->checksum);
+		printf(" id: %d\n", r_icmp_hdr->un.echo.id);
+		printf(" sequence: %d\n", r_icmp_hdr->un.echo.sequence);
+		printf(" data: %s\n", r_buffer);
 		sleep(PING_SLEEP_RATE);
 	}
 	ft_printf("--- %s ping statistics ---\n", buffer);
