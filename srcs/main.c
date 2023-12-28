@@ -12,7 +12,7 @@ void	tmp_handler(int sig, siginfo_t *info, void *context)
 	{
 		ft_putchar_fd('\n', 1);
 		g_ping_data = FALSE;
-		if (close(g_socket_fd) != 0)
+		if (g_socket_fd != -1 && close(g_socket_fd) != 0)
 		{
 			g_socket_fd = -1;
 			error("close()", errno, TRUE);
@@ -32,18 +32,22 @@ void	signal_handling()
 
 int main(int ac, char **av)
 {
+	struct iphdr        *ipHdr = NULL;
+	struct icmphdr      *r_icmp_hdr = NULL;
 	struct sockaddr_in  target;
 	struct sockaddr_in  r_addr;
+	struct timeval      timeout;
 	socklen_t           r_addr_len;
+	size_t              r_size;
 	t_ppckt             icmp_hdr;
-	char                packet[128];
 	int                 nb_packets = 0;
 	int                 count;
 	int                 i;
 	int                 ttl_val = 64;
+	char                packet[128];
 	char                buffer[ADDR_LEN];
 	char                from[NI_MAXHOST];
-	struct timeval      timeout;
+	char                *r_buffer = NULL;
 
 	signal_handling();
 	ft_bzero(&target, sizeof(target));
@@ -77,20 +81,23 @@ int main(int ac, char **av)
 
 		if (sendto(g_socket_fd, &icmp_hdr, sizeof(icmp_hdr), 0, (struct sockaddr *)&target, sizeof(target)) <= 0)
 			error("sendto()", errno, TRUE);
+
 		r_addr_len = sizeof(r_addr);
 		if (recvfrom(g_socket_fd, packet, sizeof(packet), 0, (struct sockaddr *)&r_addr, &r_addr_len) <= 0)
 			error("sendto()", errno, TRUE);
-        struct iphdr *ipHdr = (struct iphdr *)packet;
-		struct icmphdr *r_icmp_hdr = (struct icmphdr *)(packet + sizeof(struct iphdr));
-		char *r_buffer = (char *)(packet + sizeof(struct iphdr) + sizeof(struct icmphdr));
+
+        ipHdr = (struct iphdr *)packet;
+		r_icmp_hdr = (struct icmphdr *)(packet + sizeof(struct iphdr));
+		r_buffer = (char *)(packet + sizeof(struct iphdr) + sizeof(struct icmphdr));
 		getnameinfo((struct sockaddr *)&r_addr, r_addr_len, from, NI_MAXHOST, NULL, 0, 0);
-		size_t  r_size = sizeof(struct icmphdr) + ft_strlen(r_buffer) + 1;
+		r_size = sizeof(struct icmphdr) + ft_strlen(r_buffer) + 1;
 		printf("%zu bytes from %s (%s): icmp_seq=%d ttl=%d time=TBD ms\n", r_size, from, inet_ntoa(r_addr.sin_addr), ntohs(r_icmp_hdr->un.echo.sequence), ipHdr->ttl);
 		// print_reply(r_icmp_hdr, r_buffer);
 		nb_packets++;
 		sleep(PING_SLEEP_RATE);
 	}
 	ft_printf("--- %s ping statistics ---\n", buffer);
-	ft_printf("%d packets transmitted, %d received, %d%% packet loss\n", nb_packets, nb_packets, 0);
+	ft_printf("%d packets transmitted, %d received, %d%% packet loss, time TBDms\n", nb_packets, nb_packets, 0);
+	ft_printf("rtt min/avg/max/mdev = TBD/TBD/TBD/TBD ms\n");
 	return (0);
 }
