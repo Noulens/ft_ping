@@ -25,3 +25,13 @@ unsigned short calculate_checksum(unsigned short *buf, int len)
 	answer = ~sum;
 	return (answer);
 }
+
+void    print_reply(const struct icmphdr *r_icmp_hdr, const char *r_buffer)
+{
+	printf(" info from ECHO REPLY:\n");
+	printf(" type: %d\n", r_icmp_hdr->type);
+	printf(" code: %d\n", r_icmp_hdr->code);
+	printf(" id: %d\n", ntohs(r_icmp_hdr->un.echo.id));
+	printf(" sequence: %d\n", ntohs(r_icmp_hdr->un.echo.sequence));
+	printf(" data: %s\n", r_buffer);
+}

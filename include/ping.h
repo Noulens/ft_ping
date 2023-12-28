@@ -21,6 +21,7 @@
 # include <netpacket/packet.h>
 # include <net/ethernet.h>
 # include <netinet/if_ether.h>
+# include <netinet/ip.h>
 # include <sys/ioctl.h>
 # include <time.h>
 # include <linux/icmp.h>
@@ -34,6 +35,7 @@
 # define ADDR_LEN 1024
 
 extern int  g_ping_data;
+extern int  g_socket_fd;
 
 typedef enum e_options
 {
@@ -50,5 +52,6 @@ void            error(const char *msg, int error_code, int must_exit);
 int             is_valid_ip(char *ip, struct sockaddr_in *data);
 void            check_args(int ac, char **av, int *count, char *buffer);
 unsigned short  calculate_checksum(unsigned short *buf, int len);
+void            print_reply(const struct icmphdr *r_icmp_hdr, const char *r_buffer);
 
 # endif /* !PING_H */
