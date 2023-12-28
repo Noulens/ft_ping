@@ -35,3 +35,27 @@ void    print_reply(const struct icmphdr *r_icmp_hdr, const char *r_buffer)
 	printf(" sequence: %d\n", ntohs(r_icmp_hdr->un.echo.sequence));
 	printf(" data: %s\n", r_buffer);
 }
+
+static unsigned long	multiply_bitewise(long a, long b)
+{
+	unsigned long	result;
+
+	result = 0;
+	while (b > 0)
+	{
+		if ((b & 1) == 1)
+			result += a;
+		b >>= 1;
+		a <<= 1;
+	}
+	return (result);
+}
+
+time_t	gettimeinms(void)
+{
+	struct timeval	tv;
+
+	if (gettimeofday(&tv, NULL) == 1)
+		return (write(2, "Error in getting start time\n", 27), 1);
+	return (multiply_bitewise(tv.tv_sec, M) + (tv.tv_usec / M));
+}

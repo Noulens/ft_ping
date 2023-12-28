@@ -36,6 +36,12 @@ void    check_args(int ac, char **av, int *count, char *buffer)
 						if (*count < 1)
 							error("bad number of packets to transmit.", -1, TRUE);
 						break;
+					case 'v':
+						g_ping_flag |= VERBOSE;
+						break ;
+					case 'q':
+						g_ping_flag |= QUIET;
+						break ;
 					default:
 						ft_fprintf(2, RED"invalid option -- \'%c\'\n"RESET, **av);
 						exit(1);

@@ -23,7 +23,7 @@
 # include <netinet/if_ether.h>
 # include <netinet/ip.h>
 # include <sys/ioctl.h>
-# include <time.h>
+# include <sys/time.h>
 # include <linux/icmp.h>
 
 // RFC 792 for a description of the ICMP protocol.
@@ -33,13 +33,15 @@
 # define PING_SLEEP_RATE 1
 # define RECV_TIMEOUT 2
 # define ADDR_LEN 1024
+# define M 1000
 
-extern int  g_ping_data;
-extern int  g_socket_fd;
+extern int  g_ping_flag;
 
-typedef enum e_options
+typedef enum e_opt
 {
-	C = 0b00001
+	GO = 0b00000001,
+	VERBOSE = 0b00000010,
+	QUIET = 0b00000100,
 }   t_opt;
 
 typedef struct s_ping_packet
@@ -53,5 +55,6 @@ int             is_valid_ip(char *ip, struct sockaddr_in *data);
 void            check_args(int ac, char **av, int *count, char *buffer);
 unsigned short  calculate_checksum(unsigned short *buf, int len);
 void            print_reply(const struct icmphdr *r_icmp_hdr, const char *r_buffer);
+time_t          gettimeinms(void);
 
 # endif /* !PING_H */

@@ -15,7 +15,7 @@ char    *hostnameResolution(const char *hostname)
 	status = getaddrinfo(hostname, 0, &hints, &res);
 	if (status != 0)
 	{
-		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(status));
+		ft_fprintf(2, "getaddrinfo: %s\n", gai_strerror(status));
 		return (NULL);
 	}
 	r = res;
@@ -25,7 +25,7 @@ char    *hostnameResolution(const char *hostname)
 		{
 			struct sockaddr_in *ipv4 = (struct sockaddr_in *)r->ai_addr;
 			if (!inet_ntop(r->ai_family, &(ipv4->sin_addr), buffer, sizeof buffer))
-				error("inet_ntop", errno, FALSE);
+				return (ft_fprintf(2, "sendto() failed: %s", strerror(errno)), NULL);
 		}
 		r = r->ai_next;
 	}
@@ -67,7 +67,8 @@ int is_valid_ip(char *ip, struct sockaddr_in *data)
 		if (inet_pton(AF_INET, source, &data->sin_addr) != 1)
 			return (free(source), 0);
 	}
-	ft_printf("PING %s (%s) TBD(TBD) bytes of data.\n", ip, source);
+	// 56 bytes for msg + 8 bytes of icmp hdr + 20 bytes for iphdr = 84 bytes
+	ft_printf("PING %s (%s) 56(84) bytes of data.\n", ip, source);
 	free(source);
 	data->sin_family = AF_INET;
 	return (1);
