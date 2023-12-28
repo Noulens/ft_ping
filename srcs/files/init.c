@@ -43,7 +43,7 @@ void    check_args(int ac, char **av, int *count, char *buffer)
 						g_ping_flag |= QUIET;
 						break ;
 					default:
-						ft_fprintf(2, RED"invalid option -- \'%c\'\n"RESET, **av);
+						fprintf(stderr, RED"invalid option -- \'%c\'\n"RESET, **av);
 						exit(1);
 				}
 				++*av;

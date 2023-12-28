@@ -34,7 +34,7 @@ int main(int ac, char **av)
 	size_t              r_size;
 	time_t              avg = 0, min = LONG_MAX, max = 0;
 	t_ppckt             icmp_hdr;
-	int                 socket_fd = -1, nb_packets = 0, count, i, ttl_val = 64;
+	int                 socket_fd = -1, nb_packets = 0, nb_r_packets = 0, count, i, ttl_val = 64;
 	char                packet[128];
 	char                buffer[ADDR_LEN];
 	char                from[NI_MAXHOST];
@@ -71,12 +71,18 @@ int main(int ac, char **av)
 		icmp_hdr.hdr.checksum  = calculate_checksum((uint16_t *)&icmp_hdr, sizeof(icmp_hdr));
 
 		if (sendto(socket_fd, &icmp_hdr, sizeof(icmp_hdr), 0, (struct sockaddr *)&target, sizeof(target)) <= 0)
-			return (close(socket_fd), ft_fprintf(2, "sendto() failed: %s", strerror(errno)), EXIT_FAILURE);
+			fprintf(stderr, "sendto() failed: %s", strerror(errno));
+		else
+			nb_packets++;
 		time_t  start_count = gettimeinms();
+
 		r_addr_len = sizeof(r_addr);
 		if (recvfrom(socket_fd, packet, sizeof(packet), 0, (struct sockaddr *)&r_addr, &r_addr_len) <= 0)
-			return (close(socket_fd), ft_fprintf(2, "recvfrom() failed: %s", strerror(errno)), EXIT_FAILURE);
+			fprintf(stderr, "packet lost: %s", strerror(errno));
+		else
+			nb_r_packets++;
 		time_t  end_count = gettimeinms() - start_count;
+
 		if (end_count < min)
 			min = end_count;
 		if (end_count > max)
@@ -84,7 +90,6 @@ int main(int ac, char **av)
 		avg += end_count;
 
         ipHdr = (struct iphdr *)packet;
-		printf("HERE: %lu\n", sizeof(struct iphdr));
 		r_icmp_hdr = (struct icmphdr *)(packet + sizeof(struct iphdr));
 		r_buffer = (char *)(packet + sizeof(struct iphdr) + sizeof(struct icmphdr));
 		getnameinfo((struct sockaddr *)&r_addr, r_addr_len, from, NI_MAXHOST, NULL, 0, 0);
@@ -92,13 +97,12 @@ int main(int ac, char **av)
 		if (!(g_ping_flag & QUIET))
 			printf("%zu bytes from %s (%s): icmp_seq=%d ttl=%d time=%ld ms\n", r_size, from, inet_ntoa(r_addr.sin_addr), ntohs(r_icmp_hdr->un.echo.sequence), ipHdr->ttl, end_count);
 		// print_reply(r_icmp_hdr, r_buffer);
-		nb_packets++;
 		sleep(PING_SLEEP_RATE);
 	}
 	time_t  end = gettimeinms() - start;
-	ft_printf("--- %s ping statistics ---\n", buffer);
-	ft_printf("%d packets transmitted, %d received, %d%% packet loss, time %ldms\n", nb_packets, nb_packets, 0, end);
-	ft_printf("rtt min/avg/max/mdev = %ld/%ld/%ld/TBD ms\n", min, avg / nb_packets, max);
+	printf("--- %s ping statistics ---\n", buffer);
+	printf("%d packets transmitted, %d received, %0.1f%% packet loss, time %ldms\n", nb_packets, nb_r_packets, (((float)nb_packets - (float)nb_r_packets) * 100.0) / (float)nb_packets, end);
+	printf("rtt min/avg/max/mdev = %ld/%ld/%ld/TBD ms\n", min, avg / nb_packets, max);
 	if (close(socket_fd) == -1)
 		return (ft_fprintf(2, "close() failed: %s", strerror(errno)), EXIT_FAILURE);
 	return (0);

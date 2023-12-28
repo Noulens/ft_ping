@@ -31,7 +31,7 @@
 # define PING_PKT_S 64
 # define PORT_NO 0
 # define PING_SLEEP_RATE 1
-# define RECV_TIMEOUT 2
+# define RECV_TIMEOUT 1
 # define ADDR_LEN 1024
 # define M 1000
 
