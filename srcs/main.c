@@ -80,12 +80,12 @@ int main(int ac, char **av)
 		r_addr_len = sizeof(r_addr);
 		if (recvfrom(g_socket_fd, packet, sizeof(packet), 0, (struct sockaddr *)&r_addr, &r_addr_len) <= 0)
 			error("sendto()", errno, TRUE);
-        //struct iphdr *ipHdr = (struct iphdr *)packet;
+        struct iphdr *ipHdr = (struct iphdr *)packet;
 		struct icmphdr *r_icmp_hdr = (struct icmphdr *)(packet + sizeof(struct iphdr));
 		char *r_buffer = (char *)(packet + sizeof(struct iphdr) + sizeof(struct icmphdr));
 		getnameinfo((struct sockaddr *)&r_addr, r_addr_len, from, NI_MAXHOST, NULL, 0, 0);
 		size_t  r_size = sizeof(struct icmphdr) + ft_strlen(r_buffer) + 1;
-		printf("%zu bytes from %s: icmp_seq=%d ttl=TBD time=TBD ms\n", r_size, from, ntohs(r_icmp_hdr->un.echo.sequence));
+		printf("%zu bytes from %s (%s): icmp_seq=%d ttl=%d time=TBD ms\n", r_size, from, inet_ntoa(r_addr.sin_addr), ntohs(r_icmp_hdr->un.echo.sequence), ipHdr->ttl);
 		// print_reply(r_icmp_hdr, r_buffer);
 		nb_packets++;
 		sleep(PING_SLEEP_RATE);
