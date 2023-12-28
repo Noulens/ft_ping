@@ -84,11 +84,11 @@ int main(int ac, char **av)
 		struct icmphdr *r_icmp_hdr = (struct icmphdr *)(packet + sizeof(struct iphdr));
 		char *r_buffer = (char *)(packet + sizeof(struct iphdr) + sizeof(struct icmphdr));
 		getnameinfo((struct sockaddr *)&r_addr, r_addr_len, from, NI_MAXHOST, NULL, 0, 0);
-        size_t  r_size = sizeof(struct icmphdr) + ft_strlen(r_buffer) + 1;
+		size_t  r_size = sizeof(struct icmphdr) + ft_strlen(r_buffer) + 1;
 		printf("%zu bytes from %s: icmp_seq=%d ttl=TBD time=TBD ms\n", r_size, from, ntohs(r_icmp_hdr->un.echo.sequence));
 		// print_reply(r_icmp_hdr, r_buffer);
 		nb_packets++;
-        sleep(PING_SLEEP_RATE);
+		sleep(PING_SLEEP_RATE);
 	}
 	ft_printf("--- %s ping statistics ---\n", buffer);
 	ft_printf("%d packets transmitted, %d received, %d%% packet loss\n", nb_packets, nb_packets, 0);
