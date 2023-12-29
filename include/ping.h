@@ -29,7 +29,6 @@
 // RFC 792 for a description of the ICMP protocol.
 // https://tools.ietf.org/html/rfc792
 # define PING_PKT_S 64
-# define PORT_NO 0
 # define PING_SLEEP_RATE 1
 # define RECV_TIMEOUT 1
 # define ADDR_LEN 1024

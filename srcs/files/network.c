@@ -10,7 +10,8 @@ char    *hostnameResolution(const char *hostname)
 	char *ret;
 
 	ft_memset(&hints, 0, sizeof(hints));
-	hints.ai_family = AF_INET;
+	ft_memset(buffer, 0, INET_ADDRSTRLEN);
+	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 	status = getaddrinfo(hostname, 0, &hints, &res);
 	if (status != 0)
@@ -26,9 +27,14 @@ char    *hostnameResolution(const char *hostname)
 			struct sockaddr_in *ipv4 = (struct sockaddr_in *)r->ai_addr;
 			if (!inet_ntop(r->ai_family, &(ipv4->sin_addr), buffer, sizeof buffer))
 				return (fprintf(stderr, "inet_ntop() failed: %s", strerror(errno)), NULL);
+			break ;
 		}
 		r = r->ai_next;
 	}
+	if ((g_ping_flag & VERBOSE) && r)
+		printf("hints.ai_family: AF_UNSPEC\n\nai->ai_family: AF_INET, ai->ai_canonname: \'%s\'\n", r->ai_canonname ? r->ai_canonname : hostname);
+	else if (!r)
+		fprintf(stderr, "No AF_INET family found in ai LL\n");
 	freeaddrinfo(res);
 	ret = ft_strdup(buffer);
 	return (ret);
