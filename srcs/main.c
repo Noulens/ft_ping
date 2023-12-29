@@ -32,9 +32,10 @@ int main(int ac, char **av)
 	struct timeval      timeout;
 	socklen_t           r_addr_len;
 	size_t              r_size;
+	ssize_t             must_do;
 	time_t              avg = 0, min = LONG_MAX, max = 0;
 	t_ppckt             icmp_hdr;
-	int                 socket_fd = -1, nb_packets = 0, nb_r_packets = 0, count, i, ttl_val = 64, must_do;
+	int                 socket_fd = -1, nb_packets = 0, nb_r_packets = 0, count, i, ttl_val = 64;
 	char                packet[128];
 	char                buffer[ADDR_LEN];
 	char                from[NI_MAXHOST];
@@ -95,38 +96,46 @@ int main(int ac, char **av)
 
 		// Receive it if necessary
 		r_addr_len = sizeof(r_addr);
-		if (must_do > 0)
+		while (must_do > 0)
 		{
-			must_do = recvfrom(socket_fd, packet, sizeof(packet), 0, (struct sockaddr *)&r_addr, &r_addr_len);
+			must_do = recvfrom(socket_fd, packet, sizeof(packet), 0, (struct sockaddr *) &r_addr, &r_addr_len);
 			if (must_do <= 0)
 				fprintf(stderr, "packet lost: %s\n", strerror(errno));
+			else if (ipHdr = (struct iphdr *) packet, ipHdr->protocol == IPPROTO_ICMP)
+			{
+				// Get data from replies
+				r_icmp_hdr = (struct icmphdr *) (packet + sizeof(struct iphdr));
+				r_buffer = (char *) (packet + sizeof(struct iphdr) + sizeof(struct icmphdr));
+				// print_reply(r_icmp_hdr, r_buffer);
+				if (r_icmp_hdr->type == ICMP_ECHOREPLY && r_icmp_hdr->code == 0)
+				{
+					nb_r_packets++;
+					break ;
+				}
+				else
+					continue ;
+			}
 			else
-				nb_r_packets++;
+				continue ;
 		}
 		time_t  end_count = gettimeinms() - start_count;
-
-		// Do stats if necessary
-		if (must_do > 0)
+		// Do stats and print only if necessary
+		if (must_do > 0 && r_icmp_hdr)
 		{
 			if (end_count < min)
 				min = end_count;
 			if (end_count > max)
 				max = end_count;
 			avg += end_count;
-			// Get data from replies
-			ipHdr = (struct iphdr *) packet;
-			r_icmp_hdr = (struct icmphdr *) (packet + sizeof(struct iphdr));
-			r_buffer = (char *) (packet + sizeof(struct iphdr) + sizeof(struct icmphdr));
 			getnameinfo((struct sockaddr *) &r_addr, r_addr_len, from, NI_MAXHOST, NULL, 0, 0);
 			r_size = sizeof(struct icmphdr) + ft_strlen(r_buffer) + 1;
 			if (!(g_ping_flag & QUIET))
 				printf("%zu bytes from %s (%s): icmp_seq=%d ttl=%d time=%ld ms\n", r_size, from,
 				       inet_ntoa(r_addr.sin_addr), ntohs(r_icmp_hdr->un.echo.sequence), ipHdr->ttl, end_count);
-			// print_reply(r_icmp_hdr, r_buffer);
 		}
 		sleep(PING_SLEEP_RATE);
 	}
-	// End timer and print conclusions
+	// End global timer and print conclusions
 	time_t  end = gettimeinms() - start;
 	printf("--- %s ping statistics ---\n", buffer);
 	printf("%d packets transmitted, %d received, %0.1f%% packet loss, time %ldms\n", nb_packets, nb_r_packets, (((float)nb_packets - (float)nb_r_packets) * 100.0) / (float)nb_packets, end);
