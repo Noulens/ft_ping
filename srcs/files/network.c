@@ -16,7 +16,7 @@ char    *hostnameResolution(const char *hostname)
 	status = getaddrinfo(hostname, 0, &hints, &res);
 	if (status != 0)
 	{
-		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(status));
+		// fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(status));
 		return (NULL);
 	}
 	r = res;
@@ -31,9 +31,7 @@ char    *hostnameResolution(const char *hostname)
 		}
 		r = r->ai_next;
 	}
-	if ((g_ping_flag & VERBOSE) && r)
-		printf("hints.ai_family: AF_UNSPEC\n\nai->ai_family: AF_INET, ai->ai_canonname: \'%s\'\n", r->ai_canonname ? r->ai_canonname : hostname);
-	else if (!r)
+	if (!r)
 		fprintf(stderr, "No AF_INET family found in ai LL\n");
 	freeaddrinfo(res);
 	ret = ft_strdup(buffer);
@@ -74,7 +72,7 @@ int is_valid_ip(char *ip, struct sockaddr_in *data)
 			return (free(source), 0);
 	}
 	// 56 bytes for msg + 8 bytes of icmp hdr + 20 bytes for iphdr = 84 bytes
-	printf("PING %s (%s) 56(84) bytes of data.\n", ip, source);
+	printf("PING %s (%s): 56 data bytes\n", ip, source);
 	free(source);
 	data->sin_family = AF_INET;
 	return (1);

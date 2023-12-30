@@ -51,7 +51,7 @@ typedef struct s_ping_packet
 
 void            error(const char *msg, int error_code, int must_exit);
 int             is_valid_ip(char *ip, struct sockaddr_in *data);
-void            check_args(int ac, char **av, int *count, char *buffer);
+void            check_args(int ac, char **av, int *count, char *tll, char *buffer);
 unsigned short  calculate_checksum(unsigned short *buf, int len);
 time_t          gettimeinms(void);
 

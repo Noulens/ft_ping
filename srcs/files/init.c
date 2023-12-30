@@ -4,7 +4,7 @@
 
 #include "ping.h"
 
-void    check_args(int ac, char **av, int *count, char *buffer)
+void    check_args(int ac, char **av, int *count, char *ttl, char *buffer)
 {
 	size_t  len = 0;
 
@@ -35,6 +35,8 @@ void    check_args(int ac, char **av, int *count, char *buffer)
 						*count = ft_atoi(*av);
 						if (*count < 1)
 							error("bad number of packets to transmit.", -1, TRUE);
+						while (*(*av + 1))
+							++*av;
 						break;
 					case 'v':
 						g_ping_flag |= VERBOSE;
@@ -42,6 +44,37 @@ void    check_args(int ac, char **av, int *count, char *buffer)
 					case 'q':
 						g_ping_flag |= QUIET;
 						break ;
+					case '-':
+						++*av;
+						if (!ft_strncmp("ttl", *av, 3))
+						{
+							*av += 3;
+							if (**av == '\0')
+							{
+								++av;
+								--len;
+							}
+							int res = ft_atoi(*av);
+							if (res > 255)
+							{
+								fprintf(stderr, RED"option value too big: %d\n"RESET, res);
+								exit(1);
+							}
+							if (res <= 0)
+							{
+								fprintf(stderr, RED"option value too small: %d\n"RESET, res);
+								exit(1);
+							}
+							*ttl = (char)res;
+							while (*(*av + 1))
+								++*av;
+							break;
+						}
+						else
+						{
+							fprintf(stderr, RED"invalid option\n"RESET);
+							exit(1);
+						}
 					default:
 						fprintf(stderr, RED"invalid option -- \'%c\'\n"RESET, **av);
 						exit(1);

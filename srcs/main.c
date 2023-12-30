@@ -3,25 +3,11 @@
 
 int g_ping_flag = GO;
 
-void	tmp_handler(int sig, siginfo_t *info, void *context)
+void	tmp_handler(int use_less)
 {
-	(void)info;
-	(void)context;
-	if (sig == SIGINT)
-	{
-		g_ping_flag &= ~GO;
-		ft_putchar_fd('\n', 1);
-	}
-}
-
-void	signal_handling()
-{
-	struct sigaction    sa = {};
-
-	sa.sa_flags = SA_RESTART;
-	sigemptyset(&sa.sa_mask);
-	sa.sa_sigaction = tmp_handler;
-	sigaction(SIGINT, &sa, NULL);
+	(void)use_less;
+	g_ping_flag &= ~GO;
+	ft_putchar_fd('\n', 1);
 }
 
 int main(int ac, char **av)
@@ -35,16 +21,17 @@ int main(int ac, char **av)
 	ssize_t             must_do;
 	time_t              avg = 0, min = LONG_MAX, max = 0;
 	t_ppckt             icmp_hdr;
-	int                 socket_fd = -1, nb_packets = 0, nb_r_packets = 0, count, i, ttl_val = 64;
+	int                 socket_fd = -1, nb_packets = 0, nb_r_packets = 0, count, i;
+	char                ttl_val = 64;
 	char                packet[128];
 	char                buffer[ADDR_LEN];
 	char                from[NI_MAXHOST];
 	char                *r_buffer = NULL;
 
-	signal_handling();
+	signal(SIGINT, tmp_handler);
 	ft_bzero(&target, sizeof(target));
 	ft_bzero(buffer, ADDR_LEN);
-	check_args(ac, av, &count, buffer);
+	check_args(ac, av, &count, &ttl_val, buffer);
 
 	// Socket stuff
 	socket_fd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
@@ -58,7 +45,7 @@ int main(int ac, char **av)
 	{
 		if (close(socket_fd) == -1)
 			error("close()", errno, TRUE);
-		error("Name or service not known", -1, TRUE);
+		error("unknown host", -1, TRUE);
 	}
 
 	// Set timeout on socket
@@ -90,8 +77,8 @@ int main(int ac, char **av)
 
 		// Send it and time it
 		must_do = sendto(socket_fd, &icmp_hdr, sizeof(icmp_hdr), 0, (struct sockaddr *)&target, sizeof(target));
-		if (must_do <= 0)
-			fprintf(stderr, "sendto() failed: %s\n", strerror(errno));
+/*		if (must_do <= 0)
+			fprintf(stderr, "sendto() failed: %s\n", strerror(errno));*/
 		time_t  start_count = gettimeinms();
 
 		// Receive it if necessary
@@ -99,9 +86,9 @@ int main(int ac, char **av)
 		while (must_do > 0)
 		{
 			must_do = recvfrom(socket_fd, packet, sizeof(packet), 0, (struct sockaddr *) &r_addr, &r_addr_len);
-			if (must_do <= 0)
-				fprintf(stderr, "packet lost: %s\n", strerror(errno));
-			else if (ipHdr = (struct iphdr *) packet, ipHdr->protocol == IPPROTO_ICMP)
+/*			if (must_do <= 0)
+				fprintf(stderr, "packet lost: %s\n", strerror(errno));*/
+			if (ipHdr = (struct iphdr *)packet, must_do > 0 && ipHdr->protocol == IPPROTO_ICMP)
 			{
 				// Get data from replies
 				r_icmp_hdr = (struct icmphdr *) (packet + sizeof(struct iphdr));
@@ -112,8 +99,10 @@ int main(int ac, char **av)
 					nb_r_packets++;
 					break ;
 				}
-				else
-					continue ;
+				else if (r_icmp_hdr->type == ICMP_TIME_EXCEEDED && r_icmp_hdr->code == ICMP_EXC_TTL)
+				{
+					break ;
+				}
 			}
 			else
 				continue ;
@@ -129,7 +118,10 @@ int main(int ac, char **av)
 			avg += end_count;
 			getnameinfo((struct sockaddr *) &r_addr, r_addr_len, from, NI_MAXHOST, NULL, 0, 0);
 			r_size = sizeof(struct icmphdr) + ft_strlen(r_buffer) + 1;
-			if (!(g_ping_flag & QUIET))
+			if (r_icmp_hdr->type == ICMP_TIME_EXCEEDED && !(g_ping_flag & QUIET))
+				printf("%zu bytes from %s (%s): Time to live exceeded\n", r_size, from,
+				       inet_ntoa(r_addr.sin_addr));
+			else if (!(g_ping_flag & QUIET))
 				printf("%zu bytes from %s (%s): icmp_seq=%d ttl=%d time=%ld ms\n", r_size, from,
 				       inet_ntoa(r_addr.sin_addr), ntohs(r_icmp_hdr->un.echo.sequence), ipHdr->ttl, end_count);
 		}
@@ -139,7 +131,7 @@ int main(int ac, char **av)
 	time_t  end = gettimeinms() - start;
 	printf("--- %s ping statistics ---\n", buffer);
 	printf("%d packets transmitted, %d received, %0.1f%% packet loss, time %ldms\n", nb_packets, nb_r_packets, (((float)nb_packets - (float)nb_r_packets) * 100.0) / (float)nb_packets, end);
-	printf("rtt min/avg/max = %ld/%ld/%ld ms\n", min, avg / nb_packets, max);
+	printf("rtt min/avg/max = %ld/%ld/%ld ms\n", min == LONG_MAX ? 0 : min, avg / nb_packets, max);
 	if (close(socket_fd) == -1)
 		return (fprintf(stderr, "close() failed: %s", strerror(errno)), EXIT_FAILURE);
 	return (0);
