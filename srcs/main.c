@@ -25,7 +25,7 @@ int main(int ac, char **av)
 	char                ttl_val = 64;
 	char                packet[1024];
 	char                buffer[ADDR_LEN];
-	char                from[NI_MAXHOST];
+	// char                from[NI_MAXHOST];
 	char                *r_buffer = NULL;
 
 	signal(SIGINT, tmp_handler);
@@ -72,8 +72,16 @@ int main(int ac, char **av)
 
 		// Receive it if necessary
 		r_addr_len = sizeof(r_addr);
+		// Declare recvmsg variables
+		struct iovec iov;                       /* Data array */
+		struct msghdr msg;                      /* Message header */
+		struct cmsghdr *cmsg;                   /* Control related data */
+		struct sock_extended_err *sock_err;     /* Struct describing the error */
+		struct icmphdr icmph;                   /* ICMP header */
+		struct sockaddr_in remote;              /* Our socket */
 		while (must_do > 0)
 		{
+			// Do recvmsg stuff
 			must_do = recvfrom(socket_fd, packet, sizeof(packet), 0, (struct sockaddr *) &r_addr, &r_addr_len);
 /*			if (must_do <= 0)
 				fprintf(stderr, "packet lost: %s\n", strerror(errno));*/
@@ -105,21 +113,21 @@ int main(int ac, char **av)
 			if (end_count > max)
 				max = end_count;
 			avg += end_count;
-			getnameinfo((struct sockaddr *) &r_addr, r_addr_len, from, NI_MAXHOST, NULL, 0, 0);
+			// getnameinfo((struct sockaddr *) &r_addr, r_addr_len, from, NI_MAXHOST, NULL, 0, 0);
 			r_size = sizeof(struct icmphdr) + ft_strlen(r_buffer) + 1;
 			if (r_icmp_hdr->type == ICMP_TIME_EXCEEDED && !(g_ping_flag & QUIET))
-				printf("%zu bytes from %s (%s): Time to live exceeded\n", r_size, from,
-				       inet_ntoa(r_addr.sin_addr));
+				printf("%zu bytes from %s: Time to live exceeded\n", r_size, inet_ntoa(r_addr.sin_addr));
 			else if (!(g_ping_flag & QUIET))
-				printf("%zu bytes from %s (%s): icmp_seq=%d ttl=%d time=%ld ms\n", r_size, from,
-				       inet_ntoa(r_addr.sin_addr), ntohs(r_icmp_hdr->un.echo.sequence), ipHdr->ttl, end_count);
+				printf("%zu bytes from %s: icmp_seq=%d ttl=%d time=%ld ms\n", r_size, \
+				inet_ntoa(r_addr.sin_addr), ntohs(r_icmp_hdr->un.echo.sequence), ipHdr->ttl, end_count);
 		}
-		sleep(PING_SLEEP_RATE);
+		usleep(PING_USLEEP_RATE);
 	}
 	// End global timer and print conclusions
 	time_t  end = gettimeinms() - start;
 	printf("--- %s ping statistics ---\n", buffer);
-	printf("%d packets transmitted, %d received, %0.1f%% packet loss, time %ldms\n", nb_packets, nb_r_packets, (((float)nb_packets - (float)nb_r_packets) * 100.0) / (float)nb_packets, end);
+	printf("%d packets transmitted, %d received, %0.1f%% packet loss, time %ldms\n", nb_packets, nb_r_packets, \
+		(((float)nb_packets - (float)nb_r_packets) * 100.0) / (float)nb_packets, end);
 	printf("rtt min/avg/max = %ld/%ld/%ld ms\n", min == LONG_MAX ? 0 : min, avg / nb_packets, max);
 	if (close(socket_fd) == -1)
 		return (fprintf(stderr, "close() failed: %s", strerror(errno)), EXIT_FAILURE);
