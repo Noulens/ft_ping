@@ -12,8 +12,8 @@ void	tmp_handler(int use_less)
 
 int main(int ac, char **av)
 {
-	struct iphdr        *ipHdr = NULL;
 	struct icmphdr      *r_icmp_hdr = NULL;
+	struct iphdr        *ipHdr = NULL;
 	struct sockaddr_in  target, r_addr;
 	struct timeval      timeout;
 	socklen_t           r_addr_len;
@@ -75,22 +75,32 @@ int main(int ac, char **av)
 		// Declare recvmsg variables
 		struct iovec iov;                       /* Data array */
 		struct msghdr msg;                      /* Message header */
-		struct cmsghdr *cmsg;                   /* Control related data */
-		struct sock_extended_err *sock_err;     /* Struct describing the error */
-		struct icmphdr icmph;                   /* ICMP header */
-		struct sockaddr_in remote;              /* Our socket */
+//		struct cmsghdr *cmsg;                   /* Control related data */
+//		struct sock_extended_err *sock_err;     /* Struct describing the error */
+//		struct icmphdr icmph;                   /* ICMP header */
 		while (must_do > 0)
 		{
+			ft_bzero(packet, sizeof(packet));
+			iov.iov_base = packet;
+			iov.iov_len = sizeof(packet);
+			msg.msg_name = (void *)&r_addr;
+			msg.msg_namelen = r_addr_len;
+			msg.msg_iov = &iov;
+			msg.msg_iovlen = 1;
+			msg.msg_flags = 0;
+			msg.msg_control = NULL;
+			msg.msg_controllen = 0;
+			//struct in_pktinfo *pktinfo;
+
 			// Do recvmsg stuff
-			must_do = recvfrom(socket_fd, packet, sizeof(packet), 0, (struct sockaddr *) &r_addr, &r_addr_len);
-/*			if (must_do <= 0)
-				fprintf(stderr, "packet lost: %s\n", strerror(errno));*/
-			if (ipHdr = (struct iphdr *)packet, must_do > 0 && ipHdr->protocol == IPPROTO_ICMP)
+			must_do = recvmsg(socket_fd, &msg, 0);
+			if (must_do > 0)
 			{
 				// Get data from replies
-				r_icmp_hdr = (struct icmphdr *) (packet + sizeof(struct iphdr));
-				r_buffer = (char *) (packet + sizeof(struct iphdr) + sizeof(struct icmphdr));
-				// print_reply(r_icmp_hdr, r_buffer);
+				ipHdr = (struct iphdr *)packet;
+				r_icmp_hdr = (struct icmphdr *)(packet + sizeof(struct iphdr));
+				//r_buffer = (char *) (packet + sizeof(struct iphdr) + sizeof(struct icmphdr));
+				 // print_reply(r_icmp_hdr, r_buffer);
 				if (r_icmp_hdr->type == ICMP_ECHOREPLY && r_icmp_hdr->code == 0)
 				{
 					nb_r_packets++;
@@ -106,7 +116,7 @@ int main(int ac, char **av)
 		}
 		time_t  end_count = gettimeinms() - start_count;
 		// Do stats and print only if necessary
-		if (must_do > 0 && r_icmp_hdr)
+		if (must_do > 0)
 		{
 			if (end_count < min)
 				min = end_count;
@@ -114,11 +124,11 @@ int main(int ac, char **av)
 				max = end_count;
 			avg += end_count;
 			// getnameinfo((struct sockaddr *) &r_addr, r_addr_len, from, NI_MAXHOST, NULL, 0, 0);
-			r_size = sizeof(struct icmphdr) + ft_strlen(r_buffer) + 1;
+			printf("Must_do: %ld\n", must_do);
 			if (r_icmp_hdr->type == ICMP_TIME_EXCEEDED && !(g_ping_flag & QUIET))
-				printf("%zu bytes from %s: Time to live exceeded\n", r_size, inet_ntoa(r_addr.sin_addr));
+				printf("%zu bytes from %s: Time to live exceeded\n", must_do - sizeof(struct iphdr), inet_ntoa(r_addr.sin_addr));
 			else if (!(g_ping_flag & QUIET))
-				printf("%zu bytes from %s: icmp_seq=%d ttl=%d time=%ld ms\n", r_size, \
+				printf("%zu bytes from %s: icmp_seq=%d ttl=%d time=%ld ms\n", must_do - sizeof(struct iphdr), \
 				inet_ntoa(r_addr.sin_addr), ntohs(r_icmp_hdr->un.echo.sequence), ipHdr->ttl, end_count);
 		}
 		usleep(PING_USLEEP_RATE);

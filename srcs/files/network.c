@@ -7,7 +7,7 @@ char    *hostnameResolution(const char *hostname)
 	struct addrinfo *r;
 	int status;
 	char buffer[INET_ADDRSTRLEN];
-	//char from[NI_MAXHOST];
+	char from[NI_MAXHOST];
 	char *ret = NULL;
 
 	ft_memset(&hints, 0, sizeof(hints));
@@ -29,12 +29,12 @@ char    *hostnameResolution(const char *hostname)
 			if (!inet_ntop(r->ai_family, &(ipv4->sin_addr), buffer, sizeof buffer))
 				return (fprintf(stderr, "inet_ntop() failed: %s", strerror(errno)), NULL);
 			// Find FQDN from result of inet_ntop()
-/*			status = getnameinfo((struct sockaddr *)(ipv4), sizeof(struct sockaddr_in), from, NI_MAXHOST, NULL, 0, 0);
+			status = getnameinfo((struct sockaddr *)(ipv4), sizeof(struct sockaddr_in), from, NI_MAXHOST, NULL, 0, 0);
 			if (status != 0)
 			{
 				// fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(status));
 				return (NULL);
-			}*/
+			}
 			break ;
 		}
 		r = r->ai_next;
@@ -42,6 +42,7 @@ char    *hostnameResolution(const char *hostname)
 	if (!r)
 		fprintf(stderr, "No AF_INET family found in ai LL\n");
 	freeaddrinfo(res);
+	printf("from: %s\n", from);
 	ret = ft_strdup(buffer);
 	if (!ret)
 		error("hostname resolution", errno, TRUE);
