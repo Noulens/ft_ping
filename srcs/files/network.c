@@ -106,3 +106,67 @@ void    prepare_packet(t_ppckt *icmp_hdr, int *nb_packets)
 	(*icmp_hdr).hdr.un.echo.sequence = htons(++(*nb_packets));
 	(*icmp_hdr).hdr.checksum  = calculate_checksum((uint16_t *) icmp_hdr, sizeof(*icmp_hdr));
 }
+
+void    analyze_packet(const struct icmphdr *r_icmp_hdr, int *nb_r_packets, char *error_buffer)
+{
+	switch (r_icmp_hdr->type)
+	{
+		case ICMP_ECHOREPLY:
+			if (r_icmp_hdr->code == 0)
+			{
+				(*nb_r_packets)++;
+			}
+			else
+				sprintf(error_buffer, "Unhandled ECHOREPLY CODE: %d", r_icmp_hdr->code);
+			break ;
+		case ICMP_TIME_EXCEEDED:
+			switch (r_icmp_hdr->code)
+			{
+				case ICMP_EXC_TTL:
+					sprintf(error_buffer, "Time to live exceeded");
+					break ;
+				case ICMP_EXC_FRAGTIME:
+					sprintf(error_buffer, "Fragment Reass time exceeded");
+					break ;
+			}
+			break ;
+		case ICMP_DEST_UNREACH:
+			switch (r_icmp_hdr->code)
+			{
+				case ICMP_NET_UNREACH:
+					sprintf(error_buffer, "Network Unreachable");
+					break ;
+				case ICMP_HOST_UNREACH:
+					sprintf(error_buffer, "Host Unreachable");
+					break ;
+				case ICMP_PROT_UNREACH:
+					sprintf(error_buffer, "Protocol Unreachable");
+					break ;
+				case ICMP_PORT_UNREACH:
+					sprintf(error_buffer, "Port Unreachable");
+					break ;
+				case ICMP_FRAG_NEEDED:
+					sprintf(error_buffer, "Fragmentation Needed/DF set");
+					break ;
+				case ICMP_SR_FAILED:
+					sprintf(error_buffer, "Source Route failed");
+					break ;
+				case ICMP_PKT_FILTERED:
+					sprintf(error_buffer, "Packet filtered");
+					break ;
+				case ICMP_PREC_VIOLATION:
+					sprintf(error_buffer, "Precedence violation");
+					break ;
+				case ICMP_PREC_CUTOFF:
+					sprintf(error_buffer, "Precedence cut off");
+					break ;
+				default:
+					sprintf(error_buffer, "Unknowm error: %d", r_icmp_hdr->code);
+					break ;
+			}
+			break ;
+		default:
+			sprintf(error_buffer, "Unhandled ICMP TYPE: %d", r_icmp_hdr->type);
+			break ;
+	}
+}

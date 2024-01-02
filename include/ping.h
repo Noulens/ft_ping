@@ -54,6 +54,7 @@ int             is_valid_ip(char *ip, struct sockaddr_in *data);
 void            check_args(int ac, char **av, int *count, char *tll, char *buffer);
 void            prepare_packet(t_ppckt *icmp_hdr, int *nb_packets);
 void            print_reply(const struct icmphdr *r_icmp_hdr, const char *r_buffer);
+void            analyze_packet(const struct icmphdr *r_icmp_hdr, int *nb_r_packets, char *error_buffer);
 unsigned short  calculate_checksum(unsigned short *buf, int len);
 time_t          gettimeinms(void);
 
