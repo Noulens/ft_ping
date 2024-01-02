@@ -25,7 +25,7 @@ int main(int ac, char **av)
 	char                packet[1024];
 	char                buffer[ADDR_LEN];
 	char                error_buffer[255];
-	// char                from[NI_MAXHOST];
+	char                from[NI_MAXHOST];
 
 	signal(SIGINT, tmp_handler);
 	ft_bzero(&target, sizeof(target));
@@ -86,9 +86,6 @@ int main(int ac, char **av)
 			msg.msg_flags = 0;
 			msg.msg_control = NULL;
 			msg.msg_controllen = 0;
-			//struct in_pktinfo *pktinfo;
-
-			// Do recvmsg stuff
 			must_do = recvmsg(socket_fd, &msg, 0);
 			if (must_do > 0)
 			{
@@ -117,9 +114,12 @@ int main(int ac, char **av)
 			if (end_count > max)
 				max = end_count;
 			avg += end_count;
-			// getnameinfo((struct sockaddr *) &r_addr, r_addr_len, from, NI_MAXHOST, NULL, 0, 0);
 			if (!(r_icmp_hdr->type == ICMP_ECHOREPLY && r_icmp_hdr->code == 0) && !(g_ping_flag & QUIET))
-				printf("%zu bytes from %s: %s\n", must_do - sizeof(struct iphdr), inet_ntoa(r_addr.sin_addr), error_buffer);
+			{
+				getnameinfo((struct sockaddr *) &r_addr, r_addr_len, from, NI_MAXHOST, NULL, 0, 0);
+				printf("%zu bytes from %s (%s): %s\n", must_do - sizeof(struct iphdr), inet_ntoa(r_addr.sin_addr),
+				       from, error_buffer);
+			}
 			else if (!(g_ping_flag & QUIET))
 				printf("%zu bytes from %s: icmp_seq=%d ttl=%d time=%ld ms\n", must_do - sizeof(struct iphdr), \
 				inet_ntoa(r_addr.sin_addr), ntohs(r_icmp_hdr->un.echo.sequence), ipHdr->ttl, end_count);
