@@ -20,7 +20,7 @@ void	ft_free_split(char **tofree)
 	if (tofree == NULL)
 		return ;
 	if (*tofree == NULL)
-		return (free(tofree), (void)0);
+		return (free(tofree), tofree = NULL, (void)0);
 	while (tofree[++k])
 	{
 		free(tofree[k]);

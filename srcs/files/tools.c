@@ -56,6 +56,6 @@ time_t	gettimeinms(void)
 	struct timeval	tv;
 
 	if (gettimeofday(&tv, NULL) == 1)
-		return (write(2, "Error in getting start time\n", 27), 1);
+		return (fprintf(stderr, "Error in getting start time\n"), 1);
 	return (multiply_bitewise(tv.tv_sec, M) + (tv.tv_usec / M));
 }

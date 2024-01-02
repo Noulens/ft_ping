@@ -21,9 +21,9 @@ int main(int ac, char **av)
 	ssize_t             must_do;
 	time_t              avg = 0, min = LONG_MAX, max = 0;
 	t_ppckt             icmp_hdr;
-	int                 socket_fd = -1, nb_packets = 0, nb_r_packets = 0, count, i;
+	int                 socket_fd = -1, nb_packets = 0, nb_r_packets = 0, count;
 	char                ttl_val = 64;
-	char                packet[128];
+	char                packet[1024];
 	char                buffer[ADDR_LEN];
 	char                from[NI_MAXHOST];
 	char                *r_buffer = NULL;
@@ -37,8 +37,6 @@ int main(int ac, char **av)
 	socket_fd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
 	if (socket_fd == -1)
 		error("socket() failed", errno, TRUE);
-	else if (g_ping_flag & VERBOSE)
-		printf("ft_ping: sock4.fd: %d (socktype: SOCK_RAW), ", socket_fd);
 
 	// DNS search
 	if (is_valid_ip(buffer, &target) != 1)
@@ -53,7 +51,6 @@ int main(int ac, char **av)
 	timeout.tv_usec = 0;
 	if (setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO, (const char *)&timeout, sizeof(timeout)) == -1)
 		return (close(socket_fd), ft_fprintf(2, "setsockopt() failed: %s", strerror(errno)), EXIT_FAILURE);
-
 	// Set ttl value
 	if (setsockopt(socket_fd, SOL_IP, IP_TTL, &ttl_val, sizeof(ttl_val)) != 0)
 		return (close(socket_fd), ft_fprintf(2, "setsockopt() failed: %s", strerror(errno)), EXIT_FAILURE);
@@ -65,15 +62,7 @@ int main(int ac, char **av)
 		// This must_do is to indicate whether we have to wait a reply or not
 		must_do = 0;
 		// Prepare ICMP packet
-		ft_memset(&icmp_hdr, 0, sizeof(icmp_hdr));
-		icmp_hdr.hdr.type = ICMP_ECHO;
-		icmp_hdr.hdr.un.echo.id = htons(getpid());
-		icmp_hdr.hdr.code = 0;
-		for (i = 0; i < (int)sizeof(icmp_hdr.msg) - 1; i++)
-			icmp_hdr.msg[i] = 'A';
-		icmp_hdr.msg[i] = '\0';
-		icmp_hdr.hdr.un.echo.sequence = htons(++nb_packets);
-		icmp_hdr.hdr.checksum  = calculate_checksum((uint16_t *)&icmp_hdr, sizeof(icmp_hdr));
+		prepare_packet(&icmp_hdr, &nb_packets);
 
 		// Send it and time it
 		must_do = sendto(socket_fd, &icmp_hdr, sizeof(icmp_hdr), 0, (struct sockaddr *)&target, sizeof(target));
