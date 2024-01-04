@@ -79,6 +79,7 @@ int main(int ac, char **av)
 		struct msghdr msg;
 		if (must_do > 0)
 		{
+			// Prepare msg
 			ft_bzero(packet, sizeof(packet));
 			prepare_msg(r_addr_len, packet, &iov, &r_addr, &msg);
 			must_do = recvmsg(socket_fd, &msg, 0);
@@ -98,7 +99,7 @@ int main(int ac, char **av)
 			if (end_count > max)
 				max = end_count;
 			avg += end_count;
-			if (!(r_icmp_hdr->type == ICMP_ECHOREPLY && r_icmp_hdr->code == 0) && !(g_ping_flag & QUIET))
+			if (!(r_icmp_hdr->type == ICMP_ECHOREPLY && r_icmp_hdr->code == 0))
 			{
 				getnameinfo((struct sockaddr *) &r_addr, r_addr_len, from, NI_MAXHOST, NULL, 0, 0);
 				printf("%zu bytes from %s (%s): %s\n", must_do - sizeof(struct iphdr), from, inet_ntoa(r_addr.sin_addr), error_buffer);
