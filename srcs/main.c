@@ -12,6 +12,7 @@ void	tmp_handler(int useless)
 int main(int ac, char **av)
 {
 	struct icmphdr      *r_icmp_hdr = NULL;
+	struct icmp_filter  filter;
 	struct iphdr        *ipHdr = NULL;
 	struct sockaddr_in  target, r_addr;
 	struct timeval      timeout;
@@ -46,6 +47,15 @@ int main(int ac, char **av)
 	timeout.tv_usec = 0;
 	if (setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO, (const char *)&timeout, sizeof(timeout)) == -1)
 		return (close(socket_fd), ft_fprintf(2, "setsockopt() failed: %s", strerror(errno)), EXIT_FAILURE);
+	// Set up ICMP filter to allow relevant ICMP messages
+	icmp_filter_set_block_all(&filter);
+	icmp_filter_set_pass(ICMP_ECHOREPLY, &filter);
+	icmp_filter_set_pass(ICMP_TIME_EXCEEDED, &filter);
+	icmp_filter_set_pass(ICMP_DEST_UNREACH, &filter);
+	icmp_filter_set_pass(ICMP_REDIRECT, &filter);
+	// Apply the ICMP filter
+	if (setsockopt(socket_fd, SOL_RAW, ICMP_FILTER, &filter, sizeof(filter)) == -1)
+		return (close(socket_fd), ft_fprintf(2, "setsockopt() failed: %s", strerror(errno)), EXIT_FAILURE);
 	// Set ttl value
 	if (setsockopt(socket_fd, SOL_IP, IP_TTL, &ttl_val, sizeof(ttl_val)) != 0)
 		return (close(socket_fd), ft_fprintf(2, "setsockopt() failed: %s", strerror(errno)), EXIT_FAILURE);
@@ -60,16 +70,15 @@ int main(int ac, char **av)
 
 		// Send it and time it
 		must_do = sendto(socket_fd, &icmp_hdr, sizeof(icmp_hdr), 0, (struct sockaddr *)&target, sizeof(target));
-//		if (must_do <= 0)
-//			fprintf(stderr, "sendto() failed: %s\n", strerror(errno));
+		if (must_do <= 0)
+			error("sending packet", errno, TRUE);
 		double  start_count = gettimeinms();
-
 		// Receive it if necessary
 		r_addr_len = sizeof(r_addr);
 		// Declare recvmsg variables
 		struct iovec iov;
 		struct msghdr msg;
-		while (must_do > 0)
+		if (must_do > 0)
 		{
 			ft_bzero(packet, sizeof(packet));
 			iov.iov_base = packet;
@@ -84,19 +93,9 @@ int main(int ac, char **av)
 			must_do = recvmsg(socket_fd, &msg, 0);
 			if (must_do > 0)
 			{
-				// Get data from replies
 				ipHdr = (struct iphdr *)packet;
 				r_icmp_hdr = (struct icmphdr *) (packet + sizeof(struct iphdr));
-//				char                *r_buffer = NULL;
-//				r_buffer = (char *) (packet + sizeof(struct iphdr) + sizeof(struct icmphdr));
-//				print_reply(r_icmp_hdr, r_buffer);
-				if (r_icmp_hdr->type != ICMP_ECHO)
-				{
-					analyze_packet(r_icmp_hdr, &nb_r_packets, error_buffer);
-					break ;
-				}
-				else
-					continue ;
+				analyze_packet(r_icmp_hdr, &nb_r_packets, error_buffer);
 			}
 		}
 		double  end_count = (gettimeinms() - start_count);

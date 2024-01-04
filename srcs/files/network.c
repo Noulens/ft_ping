@@ -164,6 +164,26 @@ void    analyze_packet(const struct icmphdr *r_icmp_hdr, int *nb_r_packets, char
 					break ;
 			}
 			break ;
+		case ICMP_REDIRECT:
+			switch (r_icmp_hdr->code)
+			{
+				case ICMP_REDIR_NET:
+					sprintf(error_buffer, "Redirect Net");
+					break ;
+				case ICMP_REDIR_HOST:
+					sprintf(error_buffer, "Redirect Host");
+					break ;
+				case ICMP_REDIR_NETTOS:
+					sprintf(error_buffer, "Redirect Net for TOS");
+					break ;
+				case ICMP_REDIR_HOSTTOS:
+					sprintf(error_buffer, "Redirect Host for TOS");
+					break ;
+				default:
+					sprintf(error_buffer, "Unknown error: %d", r_icmp_hdr->code);
+					break ;
+			}
+			break ;
 		default:
 			sprintf(error_buffer, "Unhandled ICMP TYPE: %d", r_icmp_hdr->type);
 			break ;

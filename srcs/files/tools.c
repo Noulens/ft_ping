@@ -48,3 +48,16 @@ double gettimeinms(void)
 	return ((double)tv.tv_sec * 1000.0 + (double)tv.tv_usec / 1000.0);
 }
 
+// Function to set all bits in the filter
+// Function to set all bits in the filter (block all)
+void    icmp_filter_set_block_all(struct icmp_filter *filter)
+{
+	filter->data = ~0U;
+}
+
+// Function to clear a specific bit (type) in the filter (allow pass)
+void    icmp_filter_set_pass(int type, struct icmp_filter *filter)
+{
+	if (type < 32)
+		filter->data &= ~(1U << type);
+}

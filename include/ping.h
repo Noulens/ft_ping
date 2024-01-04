@@ -58,5 +58,7 @@ void            print_reply(const struct icmphdr *r_icmp_hdr, const char *r_buff
 void            analyze_packet(const struct icmphdr *r_icmp_hdr, int *nb_r_packets, char *error_buffer);
 unsigned short  calculate_checksum(unsigned short *buf, int len);
 double          gettimeinms(void);
+void            icmp_filter_set_pass(int type, struct icmp_filter *filter);
+void            icmp_filter_set_block_all(struct icmp_filter *filter);
 
 # endif /* !PING_H */
