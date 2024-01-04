@@ -36,26 +36,15 @@ void    print_reply(const struct icmphdr *r_icmp_hdr, const char *r_buffer)
 	printf(" data: %s\n", r_buffer);
 }
 
-static unsigned long	multiply_bitewise(long a, long b)
+double gettimeinms(void)
 {
-	unsigned long	result;
+	struct timeval tv;
 
-	result = 0;
-	while (b > 0)
+	if (gettimeofday(&tv, NULL) == -1)
 	{
-		if ((b & 1) == 1)
-			result += a;
-		b >>= 1;
-		a <<= 1;
+		fprintf(stderr, "Error in getting start time\n");
+		return (-1);
 	}
-	return (result);
+	return ((double)tv.tv_sec * 1000.0 + (double)tv.tv_usec / 1000.0);
 }
 
-time_t	gettimeinms(void)
-{
-	struct timeval	tv;
-
-	if (gettimeofday(&tv, NULL) == 1)
-		return (fprintf(stderr, "Error in getting start time\n"), 1);
-	return (multiply_bitewise(tv.tv_sec, M) + (tv.tv_usec / M));
-}

@@ -72,11 +72,11 @@ void    check_args(int ac, char **av, int *count, char *ttl, char *buffer)
 						}
 						else
 						{
-							fprintf(stderr, RED"invalid option\n"RESET);
+							fprintf(stderr, RED"ft_ping: invalid option -- \'%c\'\n"RESET, **av);
 							exit(1);
 						}
 					default:
-						fprintf(stderr, RED"invalid option -- \'%c\'\n"RESET, **av);
+						fprintf(stderr, RED"ft_ping: invalid option -- \'%c\'\n"RESET, **av);
 						exit(1);
 				}
 				++*av;

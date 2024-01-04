@@ -42,7 +42,6 @@ char    *hostnameResolution(const char *hostname)
 	if (!r)
 		fprintf(stderr, "No AF_INET family found in ai LL\n");
 	freeaddrinfo(res);
-	printf("from: %s\n", from);
 	ret = ft_strdup(buffer);
 	if (!ret)
 		error("hostname resolution", errno, TRUE);
@@ -103,7 +102,7 @@ void    prepare_packet(t_ppckt *icmp_hdr, int *nb_packets)
 	for (i = 0; i < (int)sizeof((*icmp_hdr).msg) - 1; i++)
 		(*icmp_hdr).msg[i] = 'A';
 	(*icmp_hdr).msg[i] = '\0';
-	(*icmp_hdr).hdr.un.echo.sequence = htons(++(*nb_packets));
+	(*icmp_hdr).hdr.un.echo.sequence = htons((*nb_packets)++);
 	(*icmp_hdr).hdr.checksum  = calculate_checksum((uint16_t *) icmp_hdr, sizeof(*icmp_hdr));
 }
 
@@ -161,7 +160,7 @@ void    analyze_packet(const struct icmphdr *r_icmp_hdr, int *nb_r_packets, char
 					sprintf(error_buffer, "Precedence cut off");
 					break ;
 				default:
-					sprintf(error_buffer, "Unknowm error: %d", r_icmp_hdr->code);
+					sprintf(error_buffer, "Unknown error: %d", r_icmp_hdr->code);
 					break ;
 			}
 			break ;
