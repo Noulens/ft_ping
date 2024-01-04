@@ -92,11 +92,15 @@ int main(int ac, char **av)
 //					char                *r_buffer = NULL;
 //					r_buffer = (char *) (packet + sizeof(struct iphdr) + sizeof(struct icmphdr));
 //					print_reply(r_icmp_hdr, r_buffer);
-					analyze_packet(r_icmp_hdr, &nb_r_packets, error_buffer);
-					break ;
+					if (r_icmp_hdr->type != ICMP_ECHO)
+					{
+						analyze_packet(r_icmp_hdr, &nb_r_packets, error_buffer);
+						break ;
+					}
+					else
+						continue ;
 				}
-				else
-					continue;
+					continue ;
 			}
 		}
 		double  end_count = (gettimeinms() - start_count);
