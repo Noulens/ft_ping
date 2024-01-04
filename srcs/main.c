@@ -80,15 +80,7 @@ int main(int ac, char **av)
 		if (must_do > 0)
 		{
 			ft_bzero(packet, sizeof(packet));
-			iov.iov_base = packet;
-			iov.iov_len = sizeof(packet);
-			msg.msg_name = (void *)&r_addr;
-			msg.msg_namelen = r_addr_len;
-			msg.msg_iov = &iov;
-			msg.msg_iovlen = 1;
-			msg.msg_flags = 0;
-			msg.msg_control = NULL;
-			msg.msg_controllen = 0;
+			prepare_msg(r_addr_len, packet, &iov, &r_addr, &msg);
 			must_do = recvmsg(socket_fd, &msg, 0);
 			if (must_do > 0)
 			{

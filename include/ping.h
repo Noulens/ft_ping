@@ -54,6 +54,7 @@ void            error(const char *msg, int error_code, int must_exit);
 int             is_valid_ip(char *ip, struct sockaddr_in *data);
 void            check_args(int ac, char **av, int *count, char *tll, char *buffer);
 void            prepare_packet(t_ppckt *icmp_hdr, int *nb_packets);
+void            prepare_msg(socklen_t r_addr_len, char *packet, struct iovec *iov, struct sockaddr_in *r_addr, struct msghdr *msg);
 void            print_reply(const struct icmphdr *r_icmp_hdr, const char *r_buffer);
 void            analyze_packet(const struct icmphdr *r_icmp_hdr, int *nb_r_packets, char *error_buffer);
 unsigned short  calculate_checksum(unsigned short *buf, int len);

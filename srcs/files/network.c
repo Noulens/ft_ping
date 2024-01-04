@@ -106,6 +106,19 @@ void    prepare_packet(t_ppckt *icmp_hdr, int *nb_packets)
 	(*icmp_hdr).hdr.checksum  = calculate_checksum((uint16_t *) icmp_hdr, sizeof(*icmp_hdr));
 }
 
+void    prepare_msg(socklen_t r_addr_len, char *packet, struct iovec *iov, struct sockaddr_in *r_addr, struct msghdr *msg)
+{
+	(*iov).iov_base = packet;
+	(*iov).iov_len = sizeof(packet);
+	(*msg).msg_name = (void *) r_addr;
+	(*msg).msg_namelen = r_addr_len;
+	(*msg).msg_iov = iov;
+	(*msg).msg_iovlen = 1;
+	(*msg).msg_flags = 0;
+	(*msg).msg_control = NULL;
+	(*msg).msg_controllen = 0;
+}
+
 void    analyze_packet(const struct icmphdr *r_icmp_hdr, int *nb_r_packets, char *error_buffer)
 {
 	switch (r_icmp_hdr->type)
