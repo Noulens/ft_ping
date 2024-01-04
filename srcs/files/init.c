@@ -4,7 +4,7 @@
 
 #include "ping.h"
 
-void    check_args(int ac, char **av, int *count, char *ttl, char *buffer)
+void    check_args(int ac, char **av, int *count, char *ttl, int *linger, int *interval, char *buffer)
 {
 	size_t  len = 0;
 
@@ -44,6 +44,35 @@ void    check_args(int ac, char **av, int *count, char *ttl, char *buffer)
 					case 'q':
 						g_ping_flag |= QUIET;
 						break ;
+					case '?':
+						print_help();
+						exit(0);
+					case 'i':
+						++*av;
+						if (**av == '\0')
+						{
+							++av;
+							--len;
+						}
+						*interval = ft_atoi(*av);
+						if (*interval < 1)
+							error("wrong interval number.", -1, TRUE);
+						while (*(*av + 1))
+							++*av;
+						break;
+					case 'W':
+						++*av;
+						if (**av == '\0')
+						{
+							++av;
+							--len;
+						}
+						*linger = ft_atoi(*av);
+						if (*linger < 1)
+							error("wrong linger number.", -1, TRUE);
+						while (*(*av + 1))
+							++*av;
+						break;
 					case '-':
 						++*av;
 						if (!ft_strncmp("ttl", *av, 3))

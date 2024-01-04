@@ -29,10 +29,10 @@
 // RFC 792 for a description of the ICMP protocol.
 // https://tools.ietf.org/html/rfc792
 # define PING_PKT_S 64
-# define PING_USLEEP_RATE 1000000
+# define PING_USLEEP_RATE 1
 # define RECV_TIMEOUT 1
 # define ADDR_LEN 1024
-# define M 1000
+# define M 1000000
 # define THE_MAX 9223372036854775807.0
 
 extern int  g_ping_flag;
@@ -52,11 +52,12 @@ typedef struct s_ping_packet
 
 void            error(const char *msg, int error_code, int must_exit);
 int             is_valid_ip(char *ip, struct sockaddr_in *data);
-void            check_args(int ac, char **av, int *count, char *tll, char *buffer);
+void            check_args(int ac, char **av, int *count, char *ttl, int *linger, int *interval, char *buffer);
 void            prepare_packet(t_ppckt *icmp_hdr, int *nb_packets);
 void            prepare_msg(socklen_t r_addr_len, char *packet, struct iovec *iov, struct sockaddr_in *r_addr, struct msghdr *msg);
 void            print_reply(const struct icmphdr *r_icmp_hdr, const char *r_buffer);
 void            analyze_packet(const struct icmphdr *r_icmp_hdr, int *nb_r_packets, char *error_buffer);
+void            print_help(void);
 unsigned short  calculate_checksum(unsigned short *buf, int len);
 double          gettimeinms(void);
 void            icmp_filter_set_pass(int type, struct icmp_filter *filter);

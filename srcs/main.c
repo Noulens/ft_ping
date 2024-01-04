@@ -20,7 +20,8 @@ int main(int ac, char **av)
 	ssize_t             must_do;
 	double              avg = 0, min = THE_MAX, max = 0;
 	t_ppckt             icmp_hdr;
-	int                 socket_fd = -1, nb_packets = 0, nb_r_packets = 0, count;
+	int                 socket_fd = -1, nb_packets = 0, nb_r_packets = 0;
+	int                 count, interval = PING_USLEEP_RATE, linger = RECV_TIMEOUT;
 	char                ttl_val = 64;
 	char                packet[1024];
 	char                buffer[ADDR_LEN];
@@ -30,7 +31,7 @@ int main(int ac, char **av)
 	signal(SIGINT, tmp_handler);
 	ft_bzero(&target, sizeof(target));
 	ft_bzero(buffer, ADDR_LEN);
-	check_args(ac, av, &count, &ttl_val, buffer);
+	check_args(ac, av, &count, &ttl_val, &linger, &interval, buffer);
 	// Socket stuff
 	socket_fd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
 	if (socket_fd == -1)
@@ -43,7 +44,7 @@ int main(int ac, char **av)
 		error("unknown host", -1, TRUE);
 	}
 	// Set timeout on socket
-	timeout.tv_sec = RECV_TIMEOUT;
+	timeout.tv_sec = linger;
 	timeout.tv_usec = 0;
 	if (setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO, (const char *)&timeout, sizeof(timeout)) == -1)
 		return (close(socket_fd), ft_fprintf(2, "setsockopt() failed: %s", strerror(errno)), EXIT_FAILURE);
@@ -81,12 +82,23 @@ int main(int ac, char **av)
 		{
 			// Prepare msg
 			ft_bzero(packet, sizeof(packet));
-			prepare_msg(r_addr_len, packet, &iov, &r_addr, &msg);
+			iov.iov_base = packet;
+			iov.iov_len = sizeof(packet);
+			msg.msg_name = (void *)&r_addr;
+			msg.msg_namelen = r_addr_len;
+			msg.msg_iov = &iov;
+			msg.msg_iovlen = 1;
+			msg.msg_flags = 0;
+			msg.msg_control = NULL;
+			msg.msg_controllen = 0;
 			must_do = recvmsg(socket_fd, &msg, 0);
 			if (must_do > 0)
 			{
 				ipHdr = (struct iphdr *)packet;
 				r_icmp_hdr = (struct icmphdr *) (packet + sizeof(struct iphdr));
+//				char *r_buffer;
+//				r_buffer = (char *)(packet + sizeof(struct iphdr) + sizeof(struct icmphdr));
+//				print_reply(r_icmp_hdr, r_buffer);
 				analyze_packet(r_icmp_hdr, &nb_r_packets, error_buffer);
 			}
 		}
@@ -108,7 +120,7 @@ int main(int ac, char **av)
 				printf("%zu bytes from %s: icmp_seq=%d ttl=%d time=%.3f ms\n", must_do - sizeof(struct iphdr), \
 				inet_ntoa(r_addr.sin_addr), ntohs(r_icmp_hdr->un.echo.sequence), ipHdr->ttl, (double)end_count);
 		}
-		usleep(PING_USLEEP_RATE);
+		usleep(interval * M);
 	}
 	// End global timer and print conclusions
 //	time_t  end = gettimeinms() - start;

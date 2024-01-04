@@ -61,3 +61,16 @@ void    icmp_filter_set_pass(int type, struct icmp_filter *filter)
 	if (type < 32)
 		filter->data &= ~(1U << type);
 }
+
+void    print_help(void)
+{
+	printf("Usage: ping [OPTION...] HOST ...\n");
+	printf("Send ICMP ECHO_REQUEST packets to network hosts.\n");
+	printf("Options:\n");
+	printf("-c=NUMBER                   stop after sending NUMBER packets\n");
+	printf("-i=NUMBER                   wait NUMBER seconds between sending each packet\n");
+	printf("     --ttl=N                specify N as time-to-live\n");
+	printf("-v                          verbose output\n");
+	printf("-W=N                        number of seconds to wait for response\n");
+	printf("-q                          quiet output\n");
+}
