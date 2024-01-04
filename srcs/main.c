@@ -67,7 +67,6 @@ int main(int ac, char **av)
 		must_do = 0;
 		// Prepare ICMP packet
 		prepare_packet(&icmp_hdr, &nb_packets);
-
 		// Send it and time it
 		must_do = sendto(socket_fd, &icmp_hdr, sizeof(icmp_hdr), 0, (struct sockaddr *)&target, sizeof(target));
 		if (must_do <= 0)
