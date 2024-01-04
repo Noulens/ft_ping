@@ -17,7 +17,7 @@ int main(int ac, char **av)
 	struct timeval      timeout;
 	socklen_t           r_addr_len;
 	ssize_t             must_do;
-	double              avg = 0, min = 9223372036854775807.0, max = 0;
+	double              avg = 0, min = THE_MAX, max = 0;
 	t_ppckt             icmp_hdr;
 	int                 socket_fd = -1, nb_packets = 0, nb_r_packets = 0, count;
 	char                ttl_val = 64;
@@ -125,7 +125,7 @@ int main(int ac, char **av)
 	printf("%d packets transmitted, %d packets received, %0.1f%% packet loss\n", nb_packets, nb_r_packets, \
 		(((float)nb_packets - (float)nb_r_packets) * 100.0) / (float)nb_packets);
 	if (nb_r_packets)
-		printf("round-trip min/avg/max = %.3f/%.3f/%.3f ms\n", min == LONG_MAX ? 0 : (double)min, (double)avg / nb_packets, (double)max);
+		printf("round-trip min/avg/max = %.3f/%.3f/%.3f ms\n", min == THE_MAX ? 0 : (double)min, (double)avg / nb_packets, (double)max);
 	else
 		ft_putchar_fd('\n', 1);
 	if (close(socket_fd) == -1)

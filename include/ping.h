@@ -33,6 +33,7 @@
 # define RECV_TIMEOUT 1
 # define ADDR_LEN 1024
 # define M 1000
+# define THE_MAX 9223372036854775807.0
 
 extern int  g_ping_flag;
 
