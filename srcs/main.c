@@ -114,11 +114,16 @@ int main(int ac, char **av)
 			if (!(r_icmp_hdr->type == ICMP_ECHOREPLY && r_icmp_hdr->code == 0))
 			{
 				getnameinfo((struct sockaddr *) &r_addr, r_addr_len, from, NI_MAXHOST, NULL, 0, 0);
-				printf("%zu bytes from %s (%s): %s\n", must_do - sizeof(struct iphdr), from, inet_ntoa(r_addr.sin_addr), error_buffer);
+				if (!(g_ping_flag & VERBOSE))
+					printf("%zu bytes from %s (%s): %s\n", must_do - sizeof(struct iphdr), from,
+							inet_ntoa(r_addr.sin_addr), error_buffer);
+				else
+					printf("%zu bytes from %s (%s): type: %d, code: %d: %s\n", must_do - sizeof(struct iphdr),
+							from, inet_ntoa(r_addr.sin_addr), r_icmp_hdr->type, r_icmp_hdr->code, error_buffer);
 			}
 			else if (!(g_ping_flag & QUIET))
-				printf("%zu bytes from %s: icmp_seq=%d ttl=%d time=%.3f ms\n", must_do - sizeof(struct iphdr), \
-				inet_ntoa(r_addr.sin_addr), ntohs(r_icmp_hdr->un.echo.sequence), ipHdr->ttl, (double)end_count);
+				printf("%zu bytes from %s: icmp_seq=%d ttl=%d time=%.3f ms\n", must_do - sizeof(struct iphdr),
+						inet_ntoa(r_addr.sin_addr), ntohs(r_icmp_hdr->un.echo.sequence), ipHdr->ttl, (double)end_count);
 		}
 		usleep(interval * M);
 	}
