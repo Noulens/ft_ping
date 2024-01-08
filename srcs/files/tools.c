@@ -73,4 +73,5 @@ void    print_help(void)
 	printf("-v                          verbose output\n");
 	printf("-W=N                        number of seconds to wait for response\n");
 	printf("-q                          quiet output\n");
+	printf("-?                          display this help\n");
 }
