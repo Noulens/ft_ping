@@ -111,7 +111,8 @@ int main(int ac, char **av)
 			if (end_count > max)
 				max = end_count;
 			avg += end_count;
-			if (!(r_icmp_hdr->type == ICMP_ECHOREPLY && r_icmp_hdr->code == 0))
+			if (!(r_icmp_hdr->type == ICMP_ECHOREPLY && r_icmp_hdr->code == 0
+				&& !(r_icmp_hdr->checksum - calculate_checksum((uint16_t *) r_icmp_hdr, sizeof(*r_icmp_hdr)))))
 			{
 				getnameinfo((struct sockaddr *) &r_addr, r_addr_len, from, NI_MAXHOST, NULL, 0, 0);
 				if (!(g_ping_flag & VERBOSE))
