@@ -108,11 +108,6 @@ void    prepare_packet(t_ppckt *icmp_hdr, int *nb_packets)
 
 void    analyze_packet(const struct icmphdr *r_icmp_hdr, int *nb_r_packets, char *error_buffer)
 {
-	if (r_icmp_hdr->checksum - calculate_checksum((uint16_t *) r_icmp_hdr, sizeof(*r_icmp_hdr)) != 0)
-	{
-		sprintf(error_buffer, "invalid ICMP packet, invalid checksum");
-		return ;
-	}
 	switch (r_icmp_hdr->type)
 	{
 		case ICMP_ECHOREPLY:
