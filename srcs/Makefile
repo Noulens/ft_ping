@@ -113,11 +113,3 @@ re:				fclean
 
 rebonus:		fclean
 				@$(MAKE) -s bonus
-
-test:
-				docker-compose -f ./Docker/docker-compose.yml up --build -d
-				docker exec -it ping fish
-
-cleantest:
-				docker-compose -f ./Docker/docker-compose.yml down
-				docker system prune -af

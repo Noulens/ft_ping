@@ -52,6 +52,8 @@ int is_valid_ip(char *ip, struct sockaddr_in *data)
 {
 	char    *source = NULL;
 
+	if (ft_strlen(ip) == 0)
+		error("usage error: Destination address required", -1, TRUE);
 	for (int i = 0; ip[i]; i++)
 	{
 		if (ft_isalpha(ip[i]))

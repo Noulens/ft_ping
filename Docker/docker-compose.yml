@@ -1,0 +1,14 @@
+version: '3.5'
+
+services:
+  attacker:
+    container_name: ping
+    build: ..
+    restart: on-failure
+    networks:
+      - mynetwork
+    command: tail -f /dev/null
+
+networks:
+  mynetwork:
+    driver: bridge
